@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartoon Network Hall of Fame</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for a playful, bold look */
+        body {
+            background-color: #1f2937; /* Dark background */
+        }
+        .show-card {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Fun bounce effect */
+            transform: scale(1);
+        }
+        .show-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cn-blue': '#0066cc',
+                        'cn-red': '#cc0000',
+                        'cn-yellow': '#ffcc00',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Bungee', 'sans-serif'], /* Placeholder for a fun font */
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen font-sans p-4 sm:p-8">
+
+    <!-- Header Section -->
+    <header class="text-center mb-12">
+        <h1 class="text-5xl sm:text-7xl font-extrabold tracking-tighter" style="color: #ffcc00; text-shadow: 4px 4px #cc0000;">
+            CN Hall of Fame 🏆
+        </h1>
+        <p class="text-xl sm:text-2xl mt-4 font-medium text-gray-300">
+            The Best Animated Shows Ever!
+        </p>
+    </header>
+
+    <!-- Main Content: Shows Grid -->
+    <main class="max-w-6xl mx-auto">
+        <div id="shows-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Show Cards will be injected here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- JavaScript for Show Data and Rendering -->
+    <script>
+        const cartoonShows = [
+            { name: "Adventure Time", year: "2010–2018", description: "A hero boy named Finn and his best friend Jake, a magical dog, explore the Land of Ooo, dealing with wild and weird adventures.", color: "bg-yellow-500/20", icon: "✨" },
+            { name: "The Powerpuff Girls", year: "1998–2005", description: "Blossom, Bubbles, and Buttercup are three little girls with superpowers who protect the city of Townsville from evil villains and giant monsters.", color: "bg-pink-500/20", icon: "💖" },
+            { name: "Dexter's Laboratory", year: "1996–2003", description: "Boy genius Dexter operates a giant secret laboratory, but his inventions and experiments are constantly foiled by his carefree sister, Dee Dee.", color: "bg-blue-500/20", icon: "🧠" },
+            { name: "Samurai Jack", year: "2001–2017", description: "A samurai warrior from the past is sent to a future ruled by the shape-shifting demon Aku and searches for a way back to his own time.", color: "bg-red-500/20", icon: "⚔️" },
+            { name: "Steven Universe", year: "2013–2019", description: "The youngest member of the Crystal Gems, Steven is half-human and half-Gem, learning to use his powers and protect the world.", color: "bg-purple-500/20", icon: "⭐" },
+            { name: "Regular Show", year: "2010–2017", description: "Mordecai (a blue jay) and Rigby (a raccoon) are groundskeepers whose daily routine usually escalates into surreal and bizarre comedy.", color: "bg-green-500/20", icon: "🗑️" },
+            { name: "Ed, Edd n Eddy", year: "1999–2009", description: "Three friends, all named Ed, constantly scheme to earn money from their peers to buy their favorite candy, jawbreakers.", color: "bg-orange-500/20", icon: "🍬" },
+            { name: "Teen Titans (Original)", year: "2003–2006", description: "Five teen superheroes—Robin, Starfire, Cyborg, Raven, and Beast Boy—save the city and deal with the challenges of being teenagers.", color: "bg-indigo-500/20", icon: "🦸" },
+            { name: "Ben 10", year: "2005–2008", description: "10-year-old Ben Tennyson finds the Omnitrix, a watch-like device that allows him to transform into ten different alien heroes.", color: "bg-cyan-500/20", icon: "👽" },
+        ];
+
+        /**
+         * Generates the HTML card for a single cartoon show.
+         * @param {Object} show - The show data object.
+         * @returns {string} The HTML string for the card.
+         */
+        function createShowCard(show) {
+            return `
+                <div class="show-card ${show.color} p-6 rounded-2xl border-4 border-cn-blue shadow-lg flex flex-col items-start h-full">
+                    <div class="text-5xl mb-4 p-3 bg-white/10 rounded-xl">${show.icon}</div>
+                    <h2 class="text-3xl font-bold mb-1" style="color: ${show.color.split('/')[0].replace('bg-', 'text-')}">${show.name}</h2>
+                    <p class="text-gray-400 mb-4 text-sm font-semibold">${show.year}</p>
+                    <p class="text-gray-200 flex-grow">${show.description}</p>
+                    <div class="mt-4 pt-3 border-t border-cn-blue/50 w-full text-right">
+                        <span class="text-cn-yellow font-bold uppercase text-sm tracking-wider">A Cartoon Classic</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * Renders all show cards into the main grid.
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            const grid = document.getElementById('shows-grid');
+            let allCardsHtml = '';
+            
+            cartoonShows.forEach(show => {
+                allCardsHtml += createShowCard(show);
+            });
+
+            grid.innerHTML = allCardsHtml;
+        });
+
+    </script>
+
+</body>
+</html>
