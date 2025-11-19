@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2K26 MyPlayer Builder</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background-color: #0d9488; border-radius: 3px; }
+        ::-webkit-scrollbar-track { background-color: #1f2937; }
+
+        /* Custom styles for the app */
+        .attribute-card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s ease;
+        }
+        .attribute-card:hover {
+            transform: translateY(-1px);
+        }
+        .btn-control {
+            transition: all 0.15s ease;
+        }
+        .btn-control:hover {
+            opacity: 0.8;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-dark': '#0f172a',
+                        'secondary-dark': '#1e293b',
+                        'accent-teal': '#14b8a6',
+                        'accent-dark': '#0d9488',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-primary-dark text-white min-h-screen font-sans p-4 sm:p-6 overflow-y-auto">
+
+    <!-- Global State Variables -->
+    <script>
+        const MAX_ATTRIBUTE_VALUE = 99;
+        const INITIAL_MAX_BUDGET = 2000;
+        const POINT_COST_PER_LEVEL = 20; // Simplified cost model: 20 budget points per 1 attribute level
+
+        let currentBudget = INITIAL_MAX_BUDGET;
+        let attributes = {
+            'Driving Layup': { value: 60, cost: 0, min: 60, max: 99 },
+            'Mid-Range Shot': { value: 60, cost: 0, min: 60, max: 99 },
+            'Pass Accuracy': { value: 60, cost: 0, min: 60, max: 99 },
+            'Perimeter Defense': { value: 60, cost: 0, min: 60, max: 99 },
+            'Speed': { value: 60, cost: 0, min: 60, max: 99 },
+        };
+
+        // --- Core Logic Functions ---
+
+        /**
+         * Updates the UI to reflect the current state of attributes and budget.
+         */
+        function updateUI() {
+            let totalCost = 0;
+
+            for (const name in attributes) {
+                const attr = attributes[name];
+                const valueEl = document.getElementById(`${name.replace(/\s/g, '-')}-value`);
+                const costEl = document.getElementById(`${name.replace(/\s/g, '-')}-cost`);
+                const upBtn = document.getElementById(`${name.replace(/\s/g, '-')}-up`);
+                const downBtn = document.getElementById(`${name.replace(/\s/g, '-')}-down`);
+
+                // Update attribute value and cost display
+                if (valueEl) valueEl.textContent = attr.value;
+                if (costEl) costEl.textContent = attr.cost;
+                
+                // Update button states
+                if (upBtn) upBtn.disabled = (attr.value >= attr.max) || (currentBudget - POINT_COST_PER_LEVEL < 0);
+                if (downBtn) downBtn.disabled = (attr.value <= attr.min);
+                
+                // Add to total cost
+                totalCost += attr.cost;
+            }
+
+            // Update Budget Dashboard
+            document.getElementById('budget-remaining').textContent = currentBudget;
+            document.getElementById('budget-used').textContent = totalCost;
+
+            // Highlight if budget is too low
+            const budgetCard = document.getElementById('budget-card');
+            if (currentBudget < 500) {
+                budgetCard.classList.add('bg-yellow-900', 'border-yellow-600');
+                budgetCard.classList.remove('bg-secondary-dark', 'border-gray-700');
+            } else {
+                budgetCard.classList.remove('bg-yellow-900', 'border-yellow-600');
+                budgetCard.classList.add('bg-secondary-dark', 'border-gray-700');
+            }
+        }
+
+        /**
+         * Changes an attribute's value and recalculates the cost and budget.
+         * @param {string} name - The attribute name.
+         * @param {number} delta - The change in value (+1 or -1).
+         */
+        function changeAttribute(name, delta) {
+            const attr = attributes[name];
+            const newCost = POINT_COST_PER_LEVEL; // Simplified cost: cost per level is constant
+
+            // Handle increment
+            if (delta > 0) {
+                if (attr.value < attr.max && currentBudget >= newCost) {
+                    attr.value++;
+                    attr.cost += newCost;
+                    currentBudget -= newCost;
+                }
+            }
+            // Handle decrement
+            else if (delta < 0) {
+                if (attr.value > attr.min) {
+                    attr.value--;
+                    attr.cost -= newCost;
+                    currentBudget += newCost;
+                }
+            }
+
+            updateUI();
+        }
+
+        /**
+         * Resets the entire build to its initial state.
+         */
+        function resetBuild() {
+            currentBudget = INITIAL_MAX_BUDGET;
+            for (const name in attributes) {
+                attributes[name].value = attributes[name].min;
+                attributes[name].cost = 0;
+            }
+            updateUI();
+        }
+
+        // Initialize the UI once the DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Attach reset listener
+            document.getElementById('reset-btn').addEventListener('click', resetBuild);
+            // Initial render
+            updateUI();
+        });
+
+    </script>
+    
+    <!-- Header -->
+    <header class="text-center mb-10 border-b border-accent-teal/50 pb-4">
+        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-accent-teal">
+            2K26 MyPlayer Build Planner
+        </h1>
+        <p class="text-gray-400 mt-2 text-lg">Allocate your attribute points for the perfect build.</p>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-4xl mx-auto">
+
+        <!-- Budget Dashboard -->
+        <div id="budget-card" class="bg-secondary-dark p-4 rounded-xl border border-gray-700 mb-8 flex flex-col sm:flex-row justify-between items-center transition duration-300">
+            <div class="text-center sm:text-left mb-4 sm:mb-0">
+                <h2 class="text-2xl font-semibold">Total Budget</h2>
+                <p class="text-lg text-gray-400">Total Available Points: <span class="text-accent-teal font-bold" id="budget-max">2000</span></p>
+            </div>
+            <div class="flex space-x-6">
+                <div class="text-center">
+                    <p class="text-sm uppercase text-gray-400">Used Points</p>
+                    <p class="text-3xl font-extrabold text-red-400" id="budget-used">0</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-sm uppercase text-gray-400">Remaining Points</p>
+                    <p class="text-4xl font-extrabold text-green-400" id="budget-remaining">2000</p>
+                </div>
+            </div>
+            <button id="reset-btn" class="mt-4 sm:mt-0 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-medium shadow-md transition duration-150">
+                Reset Build
+            </button>
+        </div>
+
+        <!-- Attributes List -->
+        <div class="space-y-4">
+            <!-- Dynamic Attribute Cards -->
+            <script>
+                // Function to generate HTML for one attribute card
+                function createAttributeCard(name, min, max) {
+                    const cleanName = name.replace(/\s/g, '-');
+                    return `
+                        <div class="attribute-card bg-secondary-dark p-4 rounded-xl flex flex-col md:flex-row items-center justify-between border border-accent-teal/30">
+                            <div class="flex-1 mb-3 md:mb-0">
+                                <h3 class="text-xl font-semibold text-accent-teal">${name}</h3>
+                                <p class="text-sm text-gray-400">Cost per level: ${POINT_COST_PER_LEVEL} points</p>
+                            </div>
+                            
+                            <div class="flex items-center space-x-6">
+                                <!-- Current Value Display -->
+                                <div class="text-center">
+                                    <p class="text-sm uppercase text-gray-400">Current Value</p>
+                                    <p class="text-3xl font-bold" id="${cleanName}-value">${min}</p>
+                                </div>
+                                
+                                <!-- Cost Display -->
+                                <div class="text-center hidden sm:block">
+                                    <p class="text-sm uppercase text-gray-400">Points Used</p>
+                                    <p class="text-xl font-medium text-blue-400" id="${cleanName}-cost">0</p>
+                                </div>
+
+                                <!-- Controls -->
+                                <div class="flex space-x-2">
+                                    <button 
+                                        id="${cleanName}-down" 
+                                        onclick="changeAttribute('${name}', -1)"
+                                        class="btn-control w-10 h-10 bg-gray-600 hover:bg-gray-500 rounded-full text-2xl font-extrabold disabled:opacity-30 disabled:cursor-not-allowed"
+                                        aria-label="Decrease ${name}"
+                                    >-</button>
+                                    <button 
+                                        id="${cleanName}-up" 
+                                        onclick="changeAttribute('${name}', 1)"
+                                        class="btn-control w-10 h-10 bg-accent-teal hover:bg-accent-dark rounded-full text-2xl font-extrabold disabled:opacity-30 disabled:cursor-not-allowed"
+                                        aria-label="Increase ${name}"
+                                    >+</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Generate and insert all attribute cards
+                const attributeContainer = document.querySelector('main .space-y-4');
+                let html = '';
+                for (const name in attributes) {
+                    const attr = attributes[name];
+                    html += createAttributeCard(name, attr.min, attr.max);
+                }
+                attributeContainer.innerHTML = html;
+            </script>
+        </div>
+    </main>
+
+    <!-- Footer for context -->
+    <footer class="mt-10 pt-4 border-t border-gray-700 text-center text-gray-500 text-sm">
+        <p>
+            *This is a conceptual planner. Attribute costs and minimum/maximum values are simplified for demonstration and do not reflect official NBA 2K26 game mechanics.
+        </p>
+    </footer>
+
+</body>
+</html>
